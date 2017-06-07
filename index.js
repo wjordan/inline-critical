@@ -35,6 +35,9 @@ function getScript(defer) {
     const deferFunction = function() {
         document.querySelectorAll('link[media="only x"]').forEach(function(item) {
             item.setAttribute('media', 'all');
+            window.requestIdleCallback(function() {
+                item.setAttribute('onload', 'this.rel=\'stylesheet\'');
+            }, {timeout: 2000});
         });
     };
     const deferString = `window.requestAnimationFrame(${deferFunction.toString()});`;
@@ -152,7 +155,6 @@ module.exports = function (html, styles, options) {
             // Add preload atttibutes to actual link element
             $el.attr('rel', 'preload');
             $el.attr('as', 'style');
-            $el.attr('onload', 'this.rel=\'stylesheet\'');
             if (o.defer) {
                 // temporarily set media to something inapplicable to ensure it won't fetch until specified.
                 $el.attr('media', 'only x');
