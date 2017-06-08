@@ -34,10 +34,15 @@ function getScript(defer) {
     const loadCssBase = path.dirname(loadCssMain);
     const deferFunction = function() {
         document.querySelectorAll('link[media="only x"]').forEach(function(item) {
+            item.onload = function() {
+                // Defer stylesheet loading until the next idle period, if requestIdleCallback is available.
+                function applyStylesheet() {item.rel = 'stylesheet';}
+                window.requestIdleCallback ?
+                    window.requestIdleCallback(applyStylesheet, {timeout: 2000}) :
+                    applyStylesheet();
+            };
+            // Allow preload link to begin fetching content.
             item.setAttribute('media', 'all');
-            window.requestIdleCallback(function() {
-                item.setAttribute('onload', 'this.rel=\'stylesheet\'');
-            }, {timeout: 2000});
         });
     };
     const deferString = `window.requestAnimationFrame(${deferFunction.toString()});`;
